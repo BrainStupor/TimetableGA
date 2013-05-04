@@ -3,6 +3,7 @@
 #include <math.h>
 #include "Individual.h"
 
+#define FRAND() ((double)rand()/(double)(RAND_MAX+1)
 
 
 struct Pair{
@@ -17,7 +18,7 @@ struct TimetableGA{
 	double pmut;
 
 	struct Individual *population;
-	struct Individual (*crossover)(struct Pair, double pcross);
+	struct Individual (*crossover)(struct Pair);
 	struct Pair (*selection)(struct Individual *population, int popsize);
 };
 
@@ -34,7 +35,7 @@ void initGA(struct TimetableGA *ga, int popsize, int ngen, double pcross, double
 	ga -> population = (struct Individual*)malloc(popsize * sizeof(struct Individual));
 }
 
-void setCrossover(struct TimetableGA *ga, struct Individual (*crossover)(struct Pair, double pcross)){
+void setCrossover(struct TimetableGA *ga, struct Individual (*crossover)(struct Pair)){
 	ga -> crossover = crossover;
 }
 
@@ -76,25 +77,26 @@ struct Pair tournamentSelection(struct Individual *population, int popsize){
 	return pair;
 }
 
-struct Individual CrossOver(struct Individual * first, struct Individual * second)
+struct Individual CrossOver(struct Pair pair)
 {
     struct Individual Child;
-    int fit=first->fitness+second->fitness;
+    int fit=pair.first.fitness+pair.second.fitness;
     int i,j;
     for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
 		for(j = 0; j < CLASSROOMS; ++j){
             double rd=(rand()%fit);
-            if (rd<first->fitness)
+            if (rd<pair.first.fitness)
             {
-                Child.genotype[i][j]=first->genotype[i][j];
+                Child.genotype[i][j]=pair.first.genotype[i][j];
             }
             else
             {
-                Child.genotype[i][j]=second->genotype[i][j];
+                Child.genotype[i][j]=pair.second.genotype[i][j];
             }
 
 		}
     }
+	
     return Child;
 };
 

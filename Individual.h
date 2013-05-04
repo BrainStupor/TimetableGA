@@ -9,14 +9,61 @@
 #define RANDOM_PERIOD() (rand()%(DAYS*PERIODS_PER_DAY))
 #define RANDOM_TEACHER() (rand()%TEACHERS)
 #define NONE -1
+#define MAX_SUBJECTS_PER_TEACHER 3
+#define SUBJECTS 5
 
 
 
+struct SubjectList{
+	int *hours;
+};
+
+struct TeacherList{
+	int **subjects;	//[id nauczyciela][lista przedmiotow]
+};
+
+
+
+void initSubjectList(struct SubjectList *sl){
+	int * hours = sl -> hours;
+	hours = (int*)malloc(SUBJECTS * sizeof(int));
+	int i;
+	for(i = 0; i < SUBJECTS; ++i){
+		hours[i] = 0;
+	}
+}
+
+void freeSubjectList(struct SubjectList *sl){
+	free(sl -> hours);
+}
+
+void initTeacherList(struct TeacherList *tl, int number_of_teachers){
+	int **subjects = tl -> subjects;
+	subjects = (int**)malloc(number_of_teachers * sizeof(int*));
+	int i;
+	for(i = 0; i < number_of_teachers; ++i){
+		subjects[i] = (int*)malloc(MAX_SUBJECTS_PER_TEACHER * sizeof(int));
+		int j;
+		for(j = 0; j < MAX_SUBJECTS_PER_TEACHER; ++j){
+			subjects[i][j] = NONE;
+		}
+	}
+	
+}
+
+freeTeacherList(struct TeacherList *tl){
+	int i;
+	for(i = 0; i < MAX_SUBJECTS_PER_TEACHER; ++i){
+		free(tl -> subjects[i]);
+	}
+	free(tl -> subjects);
+}
 
 struct Tuple{
 	int teacher_id;
 	int class_id;
 	int room_id;
+	int subject_id;
 };
 
 struct Individual{
