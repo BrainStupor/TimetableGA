@@ -22,6 +22,31 @@ struct TeacherList{
 	int **subjects;	//[id nauczyciela][lista przedmiotow]
 };
 
+struct ClassList{	
+	int **teachers;	//[id klasy][id przedmiotu] -> id nauczyciela tego przedmiotu
+};
+
+void initClassList(struct ClassList *cl){
+	cl -> teachers = (int**)malloc(CLASSES * sizeof(int*));
+	int i;
+	for(i = 0; i < CLASSES; ++i){
+		cl -> teachers[i] = (int*)malloc(SUBJECTS * sizeof(int));
+		int j;
+		for(j = 0; j < SUBJECTS; ++j){
+			cl -> teachers[i][j] = NONE;
+		}
+	}
+	
+}
+
+void freeClassList(struct ClassList *cl){
+	int i;
+	for(i = 0; i < CLASSES; ++i){
+		printf("a ");
+		free(cl -> teachers[i]);
+	}
+	free(cl -> teachers);
+}
 
 
 void initSubjectList(struct SubjectList *sl){
@@ -37,15 +62,14 @@ void freeSubjectList(struct SubjectList *sl){
 	free(sl -> hours);
 }
 
-void initTeacherList(struct TeacherList *tl, int number_of_teachers){
-	int **subjects = tl -> subjects;
-	subjects = (int**)malloc(number_of_teachers * sizeof(int*));
+void initTeacherList(struct TeacherList *tl){
+	tl -> subjects = (int**)malloc(TEACHERS * sizeof(int*));
 	int i;
-	for(i = 0; i < number_of_teachers; ++i){
-		subjects[i] = (int*)malloc(MAX_SUBJECTS_PER_TEACHER * sizeof(int));
+	for(i = 0; i < TEACHERS; ++i){
+		tl -> subjects[i] = (int*)malloc(MAX_SUBJECTS_PER_TEACHER * sizeof(int));
 		int j;
 		for(j = 0; j < MAX_SUBJECTS_PER_TEACHER; ++j){
-			subjects[i][j] = NONE;
+			tl -> subjects[i][j] = NONE;
 		}
 	}
 	
@@ -53,7 +77,7 @@ void initTeacherList(struct TeacherList *tl, int number_of_teachers){
 
 freeTeacherList(struct TeacherList *tl){
 	int i;
-	for(i = 0; i < MAX_SUBJECTS_PER_TEACHER; ++i){
+	for(i = 0; i < TEACHERS; ++i){
 		free(tl -> subjects[i]);
 	}
 	free(tl -> subjects);

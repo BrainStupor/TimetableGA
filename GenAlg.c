@@ -6,6 +6,11 @@
 #define FRAND() ((double)rand()/(double)(RAND_MAX+1)
 
 
+struct SubjectList subject_list;
+struct TeacherList teacher_list;
+struct ClassList class_list;
+
+ 
 struct Pair{
 	struct Individual first;
 	struct Individual second;
@@ -115,8 +120,18 @@ void Mutate(struct Individual * first)
 };
 
 int main(){
+	initClassList(&class_list);
+	initSubjectList(&subject_list);
+	initTeacherList(&teacher_list);
 	struct TimetableGA ga;
 	initGA(&ga, 100,100,1,1);
 	printf("dupa");
 	finalizeGA(&ga);
+	printf("dupa");
+	freeClassList(&class_list);
+	printf("dupa");
+	freeSubjectList(&subject_list);
+	printf("dupa");
+	freeTeacherList(&teacher_list);
+	printf("dupa");
 }
