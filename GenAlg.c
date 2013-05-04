@@ -3,7 +3,7 @@
 #include <math.h>
 #include "Individual.h"
 
-#define FRAND() ((double)rand()/(double)(RAND_MAX+1)
+#define FRAND() ((double)rand()/(double)(RAND_MAX+1))
 
 
 struct SubjectList subject_list;
@@ -105,19 +105,47 @@ struct Individual CrossOver(struct Pair pair)
     return Child;
 };
 
-void Mutate(struct Individual * first)
+void Mutate(struct Individual * first, double pmut)
 {
-    int a,b,c,d;
-    a=rand()%(DAYS*PERIODS_PER_DAY);
-    b=rand()%(DAYS*PERIODS_PER_DAY);
-    c=rand()%CLASSROOMS;
-    d=rand()%CLASSROOMS;
-
-    struct Tuple tmp;
-    tmp=first->genotype[b][d];
-    first->genotype[b][d]=first->genotype[a][c];
-    first->genotype[a][c]=tmp;
+	int i,j;
+	for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
+		for(j = 0; j < CLASSROOMS; ++j){
+			if(FRAND() <= pmut){
+				int a,b,c,d;
+				a=i;
+				b=rand()%(DAYS*PERIODS_PER_DAY);
+				c=j;
+				d=rand()%CLASSROOMS;			
+				struct Tuple tmp;
+				tmp=first->genotype[b][d];
+				first->genotype[b][d]=first->genotype[a][c];
+				first->genotype[a][c]=tmp;
+			}
+		}
+	}
 };
+
+void nextGen(struct TimetableGA *ga){
+	int i;
+	for(i = 0; i < (ga -> popsize); ++i){
+		fitness(&(ga -> population[i]));	
+	}
+	struct Individual *newpop = (struct Individual*)malloc(ga->popsize * sizeof(struct Individual));
+	for(i = 0; i < (ga -> popsize); ++i){
+		struct Pair selected = ga->selection(ga->population, ga->popsize);
+		if(FRAND() <= (ga->pcross)){
+			newpop[i] = ga->crossover(selected);
+		}
+		else{
+			newpop[i] = (selected.first.fitness > selected.second.fitness) ? selected.first : selected.second;
+		}
+		Mutate(&newpop[i], ga->pmut);
+	}
+	for(i = 0; i < (ga -> popsize); ++i){
+		ga -> population[i] = newpop[i];
+	}
+	
+}
 
 int main(){
 	initClassList(&class_list);

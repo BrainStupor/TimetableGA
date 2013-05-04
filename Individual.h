@@ -140,7 +140,7 @@ void Individual_Init(struct Individual *ind){
 	}
 }
 
-double fitness(struct Individual *ind){
+void fitness(struct Individual *ind){
 	double score = 0;
 	int i,j,k;
 	for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
@@ -155,6 +155,7 @@ double fitness(struct Individual *ind){
 			}
 		}
 	}
+	ind -> fitness = score;
 }
 
 
