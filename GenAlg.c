@@ -18,7 +18,7 @@ struct TimetableGA{
 
 	struct Individual *population;
 	struct Individual (*crossover)(struct Pair, double pcross);
-	struct Pair (*selection)(struct Individual *population, int popsize);	
+	struct Pair (*selection)(struct Individual *population, int popsize);
 };
 
 void sortPopByFitness(struct Individual *population, int size){
@@ -30,7 +30,7 @@ void initGA(struct TimetableGA *ga, int popsize, int ngen, double pcross, double
 	ga -> ngen = ngen;
 	ga -> pcross = pcross;
 	ga -> pmut = pmut;
-	
+
 	ga -> population = (struct Individual*)malloc(popsize * sizeof(struct Individual));
 }
 
@@ -66,7 +66,7 @@ struct Pair tournamentSelection(struct Individual *population, int popsize){
 			}
 			fighters[i] = population[j];
 		}
-		
+
 		sortPopByFitness(fighters, 8);
 		if(k == 0)
 			pair.first = fighters[0];
@@ -75,6 +75,28 @@ struct Pair tournamentSelection(struct Individual *population, int popsize){
 	}
 	return pair;
 }
+
+struct Individual CrossOver(struct Individual * first, struct Individual * second)
+{
+    struct Individual Child;
+    int fit=first->fitness+second->fitness;
+    int i,j;
+    for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
+		for(j = 0; j < CLASSROOMS; ++j){
+            double rd=(rand()%fit);
+            if (rd<first->fitness)
+            {
+                Child.genotype[i][j]=first->genotype[i][j];
+            }
+            else
+            {
+                Child.genotype[i][j]=second->genotype[i][j];
+            }
+
+		}
+    }
+    return Child;
+};
 
 int main(){
 	struct TimetableGA ga;
