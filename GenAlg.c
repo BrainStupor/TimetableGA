@@ -3,6 +3,8 @@
 #include <math.h>
 #include "Individual.h"
 
+
+
 struct Pair{
 	struct Individual *first;
 	struct Individual *second;
@@ -19,6 +21,9 @@ struct TimetableGA{
 	struct Pair (*selection)(struct Individual *population, int popsize, double pcross);	
 };
 
+void sortPopByFitness(struct Individual *population, int size){
+	qsort(population, size, sizeof(struct Individual), compare);
+}
 
 void initGA(struct TimetableGA *ga, int popsize, int ngen, double pcross, double pmut){
 	ga -> popsize = popsize;
@@ -29,7 +34,7 @@ void initGA(struct TimetableGA *ga, int popsize, int ngen, double pcross, double
 	ga -> population = (struct Individual*)malloc(popsize * sizeof(struct Individual));
 }
 
-void setCrossover(struct TimetableGA *ga, void (*crossover)(struct Individual *population, int popsize)){
+void setCrossover(struct TimetableGA *ga, struct Individual (*crossover)(struct Pair)){
 	ga -> crossover = crossover;
 }
 
