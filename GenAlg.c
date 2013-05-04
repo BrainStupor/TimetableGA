@@ -96,8 +96,22 @@ struct Individual CrossOver(struct Pair pair)
 
 		}
     }
-	
+
     return Child;
+};
+
+void Mutate(struct Individual * first)
+{
+    int a,b,c,d;
+    a=rand()%(DAYS*PERIODS_PER_DAY);
+    b=rand()%(DAYS*PERIODS_PER_DAY);
+    c=rand()%CLASSROOMS;
+    d=rand()%CLASSROOMS;
+
+    struct Tuple tmp;
+    tmp=first->genotype[b][d];
+    first->genotype[b][d]=first->genotype[a][c];
+    first->genotype[a][c]=tmp;
 };
 
 int main(){
