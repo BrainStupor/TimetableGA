@@ -28,7 +28,7 @@ int compare(const void *a, const void *b){
 	struct Individual *ind_a = (struct Individual*)a;
 	struct Individual *ind_b = (struct Individual*)b;
 	
-	return (ind_a -> fitness) > (ind_b -> fitness) ? 1 : -1;
+	return (ind_a -> fitness) > (ind_b -> fitness) ? -1 : 1;
 }
 
 int firstFreeSlotID(struct Individual *ind, int period_id){
