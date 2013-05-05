@@ -5,11 +5,6 @@
 
 #define FRAND() ((double)rand()/(double)(RAND_MAX+1))
 
-
-struct SubjectList subject_list;
-struct TeacherList teacher_list;
-struct ClassList class_list;
-
  
 struct Pair{
 	struct Individual first;
@@ -38,6 +33,10 @@ void initGA(struct TimetableGA *ga, int popsize, int ngen, double pcross, double
 	ga -> pmut = pmut;
 
 	ga -> population = (struct Individual*)malloc(popsize * sizeof(struct Individual));
+	int i;
+	for(i = 0; i < popsize; ++i){
+		Individual_Init(&(ga -> population[i]));
+	}
 }
 
 void setCrossover(struct TimetableGA *ga, struct Individual (*crossover)(struct Pair)){
@@ -123,6 +122,21 @@ void Mutate(struct Individual * first, double pmut)
 			}
 		}
 	}
+	for(i = 0; i < CLASSES; ++i){
+		for(j = 0; j < SUBJECTS; ++j){
+			if(FRAND() <= pmut){
+				int random_teacher = randomTeacher(j);
+				class_list.teachers[i][j] = random_teacher;
+				int k,l;
+				for(k = 0; k < DAYS*PERIODS_PER_DAY; ++k){
+					for(l = 0; l < CLASSROOMS; ++l){
+						if(first -> genotype[k][l].class_id == i && first -> genotype[k][l].subject_id == j)
+							first ->genotype[k][l].teacher_id = random_teacher;
+					}
+				}
+			}
+		}
+	}
 };
 
 void nextGen(struct TimetableGA *ga){
@@ -148,18 +162,46 @@ void nextGen(struct TimetableGA *ga){
 }
 
 int main(){
-	initClassList(&class_list);
-	initSubjectList(&subject_list);
-	initTeacherList(&teacher_list);
+	
+	
+	
+	
+	
 	struct TimetableGA ga;
+	
+	
+	initSubjectList(&subject_list);
+	
+	subject_list.hours[0] = 2;
+	subject_list.hours[1] = 5;
+	subject_list.hours[2] = 7;
+	subject_list.hours[3] = 8;	
+	subject_list.hours[4] = 6;
+	subject_list.hours[5] = 8;
+	
+	initTeacherList(&teacher_list);
+	teacher_list.subjects[0][0] = 3;
+	teacher_list.subjects[1][0] = 5;
+	teacher_list.subjects[2][0] = 0;
+	teacher_list.subjects[2][1] = 2;
+	teacher_list.subjects[3][0] = 2;
+	teacher_list.subjects[3][1] = 4;
+	teacher_list.subjects[4][0] = 0;
+	teacher_list.subjects[4][1] = 5;
+	teacher_list.subjects[5][0] = 1;
+	teacher_list.subjects[5][1] = 3;
+	teacher_list.subjects[6][0] = 2;
+	teacher_list.subjects[6][1] = 4;
+	teacher_list.subjects[7][0] = 0;
+	teacher_list.subjects[7][1] = 1;
+	teacher_list.subjects[7][2] = 4;
+	
+	initClassList(&class_list);
+	
 	initGA(&ga, 100,100,1,1);
-	printf("dupa");
+	
 	finalizeGA(&ga);
-	printf("dupa");
 	freeClassList(&class_list);
-	printf("dupa");
 	freeSubjectList(&subject_list);
-	printf("dupa");
 	freeTeacherList(&teacher_list);
-	printf("dupa");
 }
