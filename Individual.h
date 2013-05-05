@@ -13,8 +13,8 @@
 #define SUBJECTS 6
 #define PERIODS_PER_TEACHER 20
 
-#define CONFLICT_COST 100
-#define PERIOD_COST 10
+#define CONFLICT_COST 3
+#define PERIOD_COST 2
 #define WINDOW_COST 1
 
 
@@ -184,6 +184,18 @@ int teachersPeriods(struct Individual *ind, int teacher_id){
 	return total;
 }
 
+int classSubjectPeriods(struct Individual *ind, int class_id, int subject_id){
+	int total = 0;
+	int i,j;
+	for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
+		for(j = 0; j < CLASSROOMS; ++j){
+			if(ind -> genotype[i][j].class_id == class_id && ind -> genotype[i][j].subject_id == subject_id)
+				total++;
+		}
+	}
+	return total;
+}
+
 int classHasPeriod(struct Individual *ind, int class_id, int period_id){
 	int i;
 	for(i = 0; i < CLASSROOMS; ++i){
@@ -236,11 +248,19 @@ void fitness(struct Individual *ind){
 	}
 	///////////////////////
 	
+	//okienka:
 	for(i = 0; i < CLASSES; ++i){
 		cost += WINDOW_COST * windows(ind, i);
 	}
 	
-	ind -> fitness = 1.0/(cost+0.1);
+	//ilosc lekcji z odpowiednich przedmiotow:
+	for(i = 0; i < CLASSES; ++i){
+		for(j = 0; j < SUBJECTS; ++j){
+			cost += PERIOD_COST * abs(subject_list.hours[j] - classSubjectPeriods(ind, i, j));
+		}
+	}
+	
+	ind -> fitness = 5000 - cost;
 }
 
 

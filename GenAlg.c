@@ -206,7 +206,6 @@ int main(){
 	
 	int gen;
 	for(gen = 0; gen < ga.ngen; ++gen){
-		printf("prenextgen ");
 		nextGen(&ga);
 		printf("%d\t%f\n", gen, bestFitness(&ga));
 	}
