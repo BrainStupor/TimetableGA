@@ -36,7 +36,9 @@ void initGA(struct TimetableGA *ga, int popsize, int ngen, double pcross, double
 	int i;
 	for(i = 0; i < popsize; ++i){
 		Individual_Init(&(ga -> population[i]));
+		fitness(&(ga -> population[i]));
 	}
+	sortPopByFitness(ga -> population, ga -> popsize);
 }
 
 void setCrossover(struct TimetableGA *ga, struct Individual (*crossover)(struct Pair)){
@@ -84,11 +86,11 @@ struct Pair tournamentSelection(struct Individual *population, int popsize){
 struct Individual CrossOver(struct Pair pair)
 {
     struct Individual Child;
-    int fit=pair.first.fitness+pair.second.fitness;
+    double fit=pair.first.fitness+pair.second.fitness;
     int i,j;
     for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
 		for(j = 0; j < CLASSROOMS; ++j){
-            double rd=(rand()%fit);
+            double rd = FRAND() * fit;
             if (rd<pair.first.fitness)
             {
                 Child.genotype[i][j]=pair.first.genotype[i][j];
@@ -141,9 +143,7 @@ void Mutate(struct Individual * first, double pmut)
 
 void nextGen(struct TimetableGA *ga){
 	int i;
-	for(i = 0; i < (ga -> popsize); ++i){
-		fitness(&(ga -> population[i]));	
-	}
+	
 	struct Individual *newpop = (struct Individual*)malloc(ga->popsize * sizeof(struct Individual));
 	for(i = 0; i < (ga -> popsize); ++i){
 		struct Pair selected = ga->selection(ga->population, ga->popsize);
@@ -158,17 +158,18 @@ void nextGen(struct TimetableGA *ga){
 	for(i = 0; i < (ga -> popsize); ++i){
 		ga -> population[i] = newpop[i];
 	}
-	
+	for(i = 0; i < (ga -> popsize); ++i){
+		fitness(&(ga -> population[i]));	
+	}
+	sortPopByFitness(ga -> population, ga -> popsize);
 }
 
-int main(){
-	
-	
-	
-	
-	
-	struct TimetableGA ga;
-	
+double bestFitness(struct TimetableGA *ga){
+	return ga -> population[0].fitness;
+}
+
+int main(){	
+	struct TimetableGA ga;	
 	
 	initSubjectList(&subject_list);
 	
@@ -198,7 +199,17 @@ int main(){
 	
 	initClassList(&class_list);
 	
-	initGA(&ga, 100,100,1,1);
+	initGA(&ga, 200,1000,0.6,0.01);
+	
+	setSelection(&ga, &tournamentSelection);
+	setCrossover(&ga, &CrossOver);
+	
+	int gen;
+	for(gen = 0; gen < ga.ngen; ++gen){
+		printf("prenextgen ");
+		nextGen(&ga);
+		printf("%d\t%f\n", gen, bestFitness(&ga));
+	}
 	
 	finalizeGA(&ga);
 	freeClassList(&class_list);

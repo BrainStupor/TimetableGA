@@ -13,23 +13,24 @@
 #define SUBJECTS 6
 #define PERIODS_PER_TEACHER 20
 
+#define CONFLICT_COST 100
+#define PERIOD_COST 10
+#define WINDOW_COST 1
+
 
 
 struct SubjectList{
 	int *hours;
-};
+}subject_list;
 
 struct TeacherList{
 	int **subjects;	//[id nauczyciela][lista przedmiotow]
-};
+}teacher_list;
 
 struct ClassList{	
 	int **teachers;	//[id klasy][id przedmiotu] -> id nauczyciela tego przedmiotu
-};
+}class_list;
 
-struct SubjectList subject_list;
-struct TeacherList teacher_list;
-struct ClassList class_list;
 
 int randomTeacher(int subject_id){
 	int teachers[TEACHERS];
@@ -171,22 +172,75 @@ void Individual_Init(struct Individual *ind){
 	}
 }
 
+int teachersPeriods(struct Individual *ind, int teacher_id){
+	int total = 0;
+	int i,j;
+	for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
+		for(j = 0; j < CLASSROOMS; ++j){
+			if(ind -> genotype[i][j].teacher_id == teacher_id)
+				total++;
+		}
+	}
+	return total;
+}
+
+int classHasPeriod(struct Individual *ind, int class_id, int period_id){
+	int i;
+	for(i = 0; i < CLASSROOMS; ++i){
+		if(ind -> genotype[period_id][i].class_id == class_id)
+			return 1;
+	}
+	return 0;
+}
+
+int windows(struct Individual *ind, int class_id){
+	int i,j,first_period, last_period;
+	int total = 0;
+	for(i = 0; i < DAYS; ++i){
+		for(first_period = i * PERIODS_PER_DAY; !classHasPeriod(ind, class_id, first_period); ++first_period)
+			if(first_period == ((i+1) * PERIODS_PER_DAY) - 1)
+				break;
+				
+		if(first_period == ((i+1) * PERIODS_PER_DAY) - 1)
+				continue;
+				
+		for(last_period = ((i+1) * PERIODS_PER_DAY) -1; !classHasPeriod(ind, class_id, last_period); --last_period);
+		
+		for(j = first_period+1; j < last_period-1; ++j){
+			if(!classHasPeriod(ind,class_id,j))
+				total++;
+		}
+	}
+	return total;
+}
+
 void fitness(struct Individual *ind){
-	double score = 0;
+	double cost = 0;
 	int i,j,k;
+	//Iloœæ konfliktów:
 	for(i = 0; i < DAYS*PERIODS_PER_DAY; ++i){
 		for(j = 0; j < CLASSROOMS-1; ++j){
 			int teacher_id = ind -> genotype[i][j].teacher_id;
 			int class_id = ind -> genotype[i][j].class_id;
 			for(k = j + 1 ; k < CLASSROOMS; ++k){
 				if(ind -> genotype[i][k].teacher_id == teacher_id)
-						score += 10;
+						cost += CONFLICT_COST;
 				if(ind -> genotype[i][k].class_id == class_id)
-						score += 10;
+						cost += CONFLICT_COST;
 			}
 		}
 	}
-	ind -> fitness = score;
+	//Ilosc godzin nauczycieli
+	for(i = 0; i < TEACHERS; ++i){
+		cost += PERIOD_COST * abs(PERIODS_PER_TEACHER - teachersPeriods(ind, i));
+	}
+	///////////////////////
+	
+	for(i = 0; i < CLASSES; ++i){
+		cost += WINDOW_COST * windows(ind, i);
+	}
+	
+	ind -> fitness = 1.0/(cost+0.1);
 }
 
 
